@@ -35,11 +35,14 @@ handler.post(async (req: NextApiRequest, res: NextApiResponse) => {
           ],
         });
 
-        data = chatRes.data;
+        data = chatRes?.data;
+        break;
 
       case "image":
         let imgRes = await openai.createImage({ prompt, n: 2, size: "512x512" });
         data = imgRes.data;
+        break;
+
       default:
         break;
     }

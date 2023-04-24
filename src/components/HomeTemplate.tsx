@@ -39,7 +39,8 @@ export default function HomeTemplate() {
 
   const getMessageResponse = async () => {
     if (text) {
-      setMessages([...messages, { role: "user", message: text }]);
+      const copy = [...messages, { role: "user", message: text }];
+      setMessages(copy);
       setLoading(true);
       const response = await fetch("/api/gpt", {
         method: "post",
@@ -54,8 +55,13 @@ export default function HomeTemplate() {
 
       if (response?.error) console.error(response?.error);
 
-      console.log(response);
-      // procesar mensaje
+      if (Array.isArray(response?.data?.choices)) {
+        let mmss = (response?.data?.choices as any[]).map((m) => ({
+          role: m.message?.role,
+          message: m.message?.content,
+        }));
+        setMessages([...copy, ...mmss]);
+      }
       setText("");
       setLoading(false);
     }
@@ -167,10 +173,10 @@ export default function HomeTemplate() {
                           <ApiLogo />
                         </div>
                       </div>
-                      <div className="chat-header">GPT</div>
-                      <div className="chat-bubble">
-                        You were the Chosen One!
-                      </div>
+                      {prev?.role !== "assistant" ? (
+                        <div className="chat-header">GPT</div>
+                      ) : null}
+                      <div className="chat-bubble">{m.message}</div>
                     </div>
                   );
                 })}
